@@ -1,26 +1,40 @@
-"use client";
-import { ChangeEvent, useState } from "react";
-import { Input } from "../ui/input";
+'use client';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
 
-interface UserProps {
-	num_apt: string;
-	password: string;
-}
+const schema = z.object({
+	num_apt: z.string().min(3, 'Apartamento deve ter no minimo 3 números'),
+	password: z.string().min(6, 'Senha deve conter pelo menos 6 caracteres'),
+});
+
+type UserProps = z.infer<typeof schema>;
 
 export function FormLogin() {
-	const [user, setUser] = useState<UserProps>({ num_apt: "", password: "" });
+	const {
+		register,
+		handleSubmit,
+		formState: { errors, isSubmitting, isValid },
+	} = useForm<UserProps>({
+		resolver: zodResolver(schema),
+	});
 
-	function handleChange(ev: ChangeEvent<HTMLInputElement>) {
-		const fieldValue = ev.target.value;
+	const onSubmit: SubmitHandler<UserProps> = async (data) => {
+		console.log(JSON.stringify(data));
+		await new Promise((resolve, reject) => setTimeout(resolve, 3000));
+	};
 
-		const fieldName = ev.target.name;
+	// const [user, setUser] = useState<UserProps>({ num_apt: '', password: '' });
 
-		setUser((state) => ({ ...state, [fieldName]: fieldValue }));
-	}
+	// function handleChange(ev: ChangeEvent<HTMLInputElement>) {
+	// 	const fieldValue = ev.target.value;
 
-	function sendForm() {
-		console.log(user);
-	}
+	// 	const fieldName = ev.target.name;
+
+	// 	setUser((state) => ({ ...state, [fieldName]: fieldValue }));
+	// }
 
 	return (
 		<div className="mx-auto max-w-screen-xl px-4 py-16 sm:px-6 lg:px-8">
@@ -28,12 +42,14 @@ export function FormLogin() {
 				<h1 className="text-2xl font-bold sm:text-3xl">Fazer Login</h1>
 
 				<p className="mt-4  text-zinc-100">
-					Lorem ipsum dolor sit amet consectetur adipisicing elit. Et libero nulla
-					eaque error neque ipsa culpa autem, at itaque nostrum!
+					Lorem ipsum dolor sit amet consectetur adipisicing elit. Et libero nulla eaque
+					error neque ipsa culpa autem, at itaque nostrum!
 				</p>
 			</div>
 
-			<form action="" className="mx-auto mb-0 mt-8 max-w-md space-y-4">
+			<form
+				onSubmit={handleSubmit(onSubmit)}
+				className="mx-auto mb-0 mt-8 max-w-md space-y-4">
 				<div>
 					<label htmlFor="num_apt" className="sr-only">
 						Número do Apartamento
@@ -41,13 +57,15 @@ export function FormLogin() {
 
 					<div className="relative">
 						<Input
+							{...register('num_apt')}
 							className="text-gray-950 placeholder:text-gray-400"
-							onChange={handleChange}
+							// onChange={handleChange}
 							type="string"
-							value={user.num_apt}
+							// value={user.num_apt}
 							name="num_apt"
 							placeholder="Número do apartamento"
 						/>
+						{errors.num_apt && <p role="alert">{errors.num_apt?.message}</p>}
 					</div>
 				</div>
 
@@ -58,13 +76,19 @@ export function FormLogin() {
 
 					<div className="relative">
 						<Input
+							{...register('password')}
 							className="text-gray-950 placeholder:text-gray-400"
-							onChange={handleChange}
-							value={user.password}
+							// onChange={handleChange}
+							// value={user.password}
 							type="password"
 							name="password"
 							placeholder="Senha"
 						/>
+						{errors.password && (
+							<p className="text-red-500" role="alert">
+								{errors.password?.message}
+							</p>
+						)}
 
 						<span className="absolute inset-y-0 end-0 grid place-content-center px-4">
 							<svg
@@ -72,8 +96,7 @@ export function FormLogin() {
 								className="h-4 w-4 text-gray-400"
 								fill="none"
 								viewBox="0 0 24 24"
-								stroke="currentColor"
-							>
+								stroke="currentColor">
 								<path
 									strokeLinecap="round"
 									strokeLinejoin="round"
@@ -100,13 +123,9 @@ export function FormLogin() {
 						</a>
 					</p>
 
-					<button
-						type="button"
-						onClick={sendForm}
-						className="inline-block rounded-lg bg-blue-500 px-5 py-3 text-sm font-medium text-white"
-					>
+					<Button type="submit" disabled={isSubmitting}>
 						Entrar
-					</button>
+					</Button>
 				</div>
 			</form>
 		</div>
