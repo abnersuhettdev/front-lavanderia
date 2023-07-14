@@ -1,9 +1,11 @@
 'use client';
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
+import { toast } from '../ui/use-toast';
 
 const schema = z.object({
 	num_apt: z.string().min(3, 'Apartamento deve ter no minimo 3 números'),
@@ -13,16 +15,19 @@ const schema = z.object({
 type UserProps = z.infer<typeof schema>;
 
 export function FormLogin() {
-	const {
-		register,
-		handleSubmit,
-		formState: { errors, isSubmitting, isValid },
-	} = useForm<UserProps>({
+	const form = useForm<UserProps>({
 		resolver: zodResolver(schema),
 	});
 
 	const onSubmit: SubmitHandler<UserProps> = async (data) => {
-		console.log(JSON.stringify(data));
+		toast({
+			title: 'You submitted the following values:',
+			description: (
+				<pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
+					<code className="text-white">{JSON.stringify(data, null, 2)}</code>
+				</pre>
+			),
+		});
 		await new Promise((resolve, reject) => setTimeout(resolve, 3000));
 	};
 
@@ -47,87 +52,72 @@ export function FormLogin() {
 				</p>
 			</div>
 
-			<form
-				onSubmit={handleSubmit(onSubmit)}
-				className="mx-auto mb-0 mt-8 max-w-md space-y-4">
-				<div>
-					<label htmlFor="num_apt" className="sr-only">
-						Número do Apartamento
-					</label>
+			<Form {...form}>
+				<form
+					onSubmit={form.handleSubmit(onSubmit)}
+					className="mx-auto mb-0 mt-8 max-w-md space-y-4">
+					<div>
+						<label htmlFor="num_apt" className="sr-only">
+							Número do Apartamento
+						</label>
 
-					<div className="relative">
-						<Input
-							{...register('num_apt')}
-							className="text-gray-950 placeholder:text-gray-400"
-							// onChange={handleChange}
-							type="string"
-							// value={user.num_apt}
+						<FormField
+							control={form.control}
 							name="num_apt"
-							placeholder="Número do apartamento"
+							render={({ field }) => (
+								<FormItem>
+									<FormControl>
+										<Input
+											{...field}
+											className="text-gray-950 placeholder:text-gray-400"
+											type="string"
+											placeholder="Número do apartamento"
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
 						/>
-						{errors.num_apt && <p role="alert">{errors.num_apt?.message}</p>}
 					</div>
-				</div>
 
-				<div>
-					<label htmlFor="password" className="sr-only">
-						Password
-					</label>
-
-					<div className="relative">
-						<Input
-							{...register('password')}
-							className="text-gray-950 placeholder:text-gray-400"
-							// onChange={handleChange}
-							// value={user.password}
-							type="password"
+					<div>
+						<label htmlFor="password" className="sr-only">
+							Password
+						</label>
+						<FormField
+							control={form.control}
 							name="password"
-							placeholder="Senha"
+							render={({ field }) => (
+								<FormItem>
+									<FormControl>
+										<Input
+											{...field}
+											className="text-gray-950 placeholder:text-gray-400"
+											type="password"
+											placeholder="Número do apartamento"
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
 						/>
-						{errors.password && (
-							<p className="text-red-500" role="alert">
-								{errors.password?.message}
-							</p>
-						)}
-
-						<span className="absolute inset-y-0 end-0 grid place-content-center px-4">
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								className="h-4 w-4 text-gray-400"
-								fill="none"
-								viewBox="0 0 24 24"
-								stroke="currentColor">
-								<path
-									strokeLinecap="round"
-									strokeLinejoin="round"
-									strokeWidth="2"
-									d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-								/>
-								<path
-									strokeLinecap="round"
-									strokeLinejoin="round"
-									strokeWidth="2"
-									d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-								/>
-							</svg>
-						</span>
 					</div>
-				</div>
 
-				<div className="flex items-center justify-between">
-					<p className="text-sm text-gray-500">
-						Não tem conta?
-						<br />
-						<a className="underline" href="">
-							Criar conta
-						</a>
-					</p>
+					<div className="flex items-center justify-between">
+						<p className="text-sm text-gray-500">
+							Não tem conta?
+							<br />
+							<a className="underline" href="">
+								Criar conta
+							</a>
+						</p>
 
-					<Button type="submit" disabled={isSubmitting}>
-						Entrar
-					</Button>
-				</div>
-			</form>
+						<Button type="submit" disabled={form.formState.isSubmitting}>
+							Entrar
+						</Button>
+					</div>
+				</form>
+			</Form>
 		</div>
 	);
 }
